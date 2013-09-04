@@ -1,26 +1,32 @@
 package se.kjellstrand.volleydemo;
 
+import java.io.File;
+
 import android.app.Application;
 import android.graphics.Bitmap;
-import android.support.v4.util.LruCache;
+import android.util.LruCache;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLoader.ImageCache;
 import com.android.volley.toolbox.Volley;
 
 /**
  * Created by erbsman on 7/25/13.
  */
 public class VolleyDemoApplication extends Application {
+    
+    private static final int DEFAULT_DISK_USAGE_BYTES = 10 * 1024 * 1024; // 10 Mb
 
+    private static final String TAG = VolleyDemoApplication.class.getCanonicalName();
+   
     private static VolleyDemoApplication sInstance;
 
     private DemoApi mApi;
     
-    private final LruCache<String, Bitmap> mImageCache = new LruCache<String, Bitmap>(20);
-
     private ImageLoader mImageLoader;
+
+    private RequestQueue mRequestQueue;
 
     public static VolleyDemoApplication get() {
         return sInstance;
@@ -31,22 +37,24 @@ public class VolleyDemoApplication extends Application {
         super.onCreate();
         sInstance = this;
 
-        RequestQueue queue = Volley.newRequestQueue(this);
-        mApi = new DemoApi(queue);
-
-        ImageCache imageCache = new ImageCache() {
-            @Override
-            public void putBitmap(String key, Bitmap value) {
-                mImageCache.put(key, value);
-            }
-
-            @Override
-            public Bitmap getBitmap(String key) {
-                return mImageCache.get(key);
-            }
-        };
-
-        mImageLoader = new ImageLoader(queue, imageCache);
+        mRequestQueue = Volley.newRequestQueue(this);
+        mApi = new DemoApi(mRequestQueue);
+        
+        // get a path to the internal cache dir.
+        File cacheDir = getCacheDir();
+        if (cacheDir == null) {
+            // get a path to the external cache dir, if no internal exists.
+            cacheDir = getExternalCacheDir();
+        }
+        
+        if(cacheDir != null){            
+            DNMCache imageCache = new DNMCache(cacheDir, DEFAULT_DISK_USAGE_BYTES);
+            imageCache.initialize();
+            mImageLoader = new ImageLoader(mRequestQueue, imageCache);
+        } else {
+            Toast.makeText(getApplicationContext(), "Failed to create a disk cache, exiting.",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     public DemoApi getApi() {
