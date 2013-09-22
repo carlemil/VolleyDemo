@@ -1,34 +1,30 @@
 package se.kjellstrand.volleydemo;
 
-import java.nio.ByteBuffer;
+import java.io.File;
 
 import android.app.Application;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.support.v4.util.LruCache;
-import android.util.Log;
+import android.widget.Toast;
 
-import com.android.volley.Cache.Entry;
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLoader.ImageCache;
 import com.android.volley.toolbox.Volley;
 
 /**
  * Created by erbsman on 7/25/13.
  */
 public class VolleyDemoApplication extends Application {
+    
+    private static final int DEFAULT_DISK_USAGE_BYTES = 10 * 1024 * 1024; // 10 Mb
 
-    protected static final String TAG = null;
-
+    private static final String TAG = VolleyDemoApplication.class.getCanonicalName();
+   
     private static VolleyDemoApplication sInstance;
 
     private DemoApi mApi;
-
-    private final LruCache<String, Bitmap> mImageCache = new LruCache<String, Bitmap>(20);
-
+    
     private ImageLoader mImageLoader;
+
+    private RequestQueue mRequestQueue;
 
     public static VolleyDemoApplication get() {
         return sInstance;
@@ -39,56 +35,25 @@ public class VolleyDemoApplication extends Application {
         super.onCreate();
         sInstance = this;
 
-        RequestQueue queue = Volley.newRequestQueue(this);
-        mApi = new DemoApi(queue);
 
-        final DiskBasedCache dbc = new DiskBasedCache(getCacheDir());
-
-        ImageCache imageCache = new ImageCache() {
-            @Override
-            public void putBitmap(String key, Bitmap bitmap) {
-                if (mImageCache.get(key) == null) {
-                    mImageCache.put(key, bitmap);
-                    int bytes = bitmap.getByteCount();
-                    // or we can calculate bytes this way. Use a different value
-                    // than 4 if you don't use 32bit images.
-                    // int bytes = b.getWidth()*b.getHeight()*4;
-                    ByteBuffer buffer = ByteBuffer.allocate(bytes); // Create a
-                                                                    // new
-                                                                    // buffer
-                    bitmap.copyPixelsToBuffer(buffer); // Move the byte data to
-                                                       // the buffer
-                    byte[] array = buffer.array();
-
-                    Entry entry = new Entry();
-                    entry.data = array;
-                    dbc.put(key, entry);
-                    Log.d(TAG, "Wrote bitmap to disk cache.");
-                }
-            }
-
-            @Override
-            public Bitmap getBitmap(String key) {
-                Bitmap memBitmap = mImageCache.get(key);
-                if (memBitmap != null) {
-                    Log.d(TAG, "Found bitmap in mem cache.");
-                    return memBitmap;
-                } else {
-                    Entry entry = dbc.get(key);
-                    if (entry != null) {
-                        Bitmap diskBitmap = BitmapFactory.decodeByteArray(entry.data, 0, entry.data.length);
-                        mImageCache.put(key, diskBitmap);
-                        Log.d(TAG, "Found bitmap in disk cache.");
-                        return diskBitmap;
-                    } else {
-                        Log.d(TAG, "Bitmap not found in cache.");
-                        return null;
-                    }
-                }
-            }
-        };
-
-        mImageLoader = new ImageLoader(queue, imageCache);
+        mRequestQueue = Volley.newRequestQueue(this);
+        mApi = new DemoApi(mRequestQueue);
+        
+        // get a path to the internal cache dir.
+        File cacheDir = getCacheDir();
+        if (cacheDir == null) {
+            // get a path to the external cache dir, if no internal exists.
+            cacheDir = getExternalCacheDir();
+        }
+        
+        if(cacheDir != null){            
+            DNMCache imageCache = new DNMCache(cacheDir, DEFAULT_DISK_USAGE_BYTES);
+            imageCache.initialize();
+            mImageLoader = new ImageLoader(mRequestQueue, imageCache);
+        } else {
+            Toast.makeText(getApplicationContext(), "Failed to create a disk cache, exiting.",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     public DemoApi getApi() {
