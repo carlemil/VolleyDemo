@@ -47,7 +47,7 @@ public class VolleyDemoApplication extends Application {
         }
         
         if(cacheDir != null){            
-            DNMCache imageCache = new DNMCache(cacheDir, DEFAULT_DISK_USAGE_BYTES);
+            DNMImageCache imageCache = new DNMImageCache(cacheDir, DEFAULT_DISK_USAGE_BYTES);
             imageCache.initialize();
             mImageLoader = new ImageLoader(mRequestQueue, imageCache);
         } else {

@@ -11,18 +11,18 @@ import android.util.LruCache;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.ImageLoader.ImageCache;
 
-public class DNMCache extends DiskBasedCache implements ImageCache {
+public class DNMImageCache extends DiskBasedCache implements ImageCache {
 
-    private static final String TAG = DNMCache.class.getCanonicalName();
+    private static final String TAG = DNMImageCache.class.getCanonicalName();
 
     private final LruCache<String, Bitmap> mImageCache =
             new LruCache<String, Bitmap>(50);
 
-    public DNMCache(File cacheDir, int diskMaxUsage) {
+    public DNMImageCache(File cacheDir, int diskMaxUsage) {
         super(cacheDir, diskMaxUsage);
     }
 
-    public DNMCache(File cacheDir) {
+    public DNMImageCache(File cacheDir) {
         super(cacheDir);
     }
 
