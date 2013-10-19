@@ -31,7 +31,7 @@ public class VolleyDemoApplication extends Application {
 		mRequestQueue = Volley.newRequestQueue(this);
 		mApi = new DemoApi(mRequestQueue);
 
-		BitmapLruCache imageCache = new BitmapLruCache();
+		BitmapLruCache imageCache = new BitmapLruCache(getApplicationContext());
 		mImageLoader = new ImageLoader(mRequestQueue, imageCache);
 	}
 
