@@ -38,11 +38,12 @@ public class VolleySingleton {
         return mInstance;
     }
 
-    public static VolleySingleton initialize(Context context, int cacheSize) {
+    public static void initialize(Context context, int cacheSize) {
         if (mInstance == null) {
             mInstance = new VolleySingleton(context, cacheSize);
+        } else {
+            throw new IllegalStateException("You already called VolleySingleton.initialize()!");
         }
-        return mInstance;
     }
 
     public RequestQueue getRequestQueue() {
