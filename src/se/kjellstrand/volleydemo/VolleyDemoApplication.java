@@ -1,23 +1,15 @@
 package se.kjellstrand.volleydemo;
 
+import android.app.ActivityManager;
 import android.app.Application;
-
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.Volley;
+import android.content.Context;
 
 /**
  * Created by erbsman on 7/25/13.
  */
 public class VolleyDemoApplication extends Application {
-   
+
     private static VolleyDemoApplication sInstance;
-
-    private DemoApi mApi;
-    
-    private ImageLoader mImageLoader;
-
-    private RequestQueue mRequestQueue;
 
     public static VolleyDemoApplication get() {
         return sInstance;
@@ -28,19 +20,10 @@ public class VolleyDemoApplication extends Application {
         super.onCreate();
         sInstance = this;
 
-		mRequestQueue = Volley.newRequestQueue(this);
-		mApi = new DemoApi(mRequestQueue);
+        int cacheSize = ((ActivityManager) getSystemService(Context.ACTIVITY_SERVICE))
+                .getMemoryClass() / 8;
+        VolleySingleton.initialize(getApplicationContext(), cacheSize);
 
-		BitmapLruCache imageCache = new BitmapLruCache(getApplicationContext());
-		mImageLoader = new ImageLoader(mRequestQueue, imageCache);
-	}
-
-    public DemoApi getApi() {
-        return mApi;
-    }
-
-    public ImageLoader getImageLoader() {
-        return mImageLoader;
     }
 
 }

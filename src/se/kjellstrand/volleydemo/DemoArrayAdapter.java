@@ -21,7 +21,7 @@ import com.android.volley.VolleyError;
 public class DemoArrayAdapter extends BaseAdapter implements Response.ErrorListener, Listener<DemoItem[]> {
 
     public static final int PER_PAGE = 5;
-    
+
     private final List<DemoItem> mDemoItems = new ArrayList<DemoItem>();
 
     private final Context mContext;
@@ -69,7 +69,7 @@ public class DemoArrayAdapter extends BaseAdapter implements Response.ErrorListe
         }
 
         int page = (int) (mDemoItems.size() / (double) PER_PAGE);
-        mInFlightRequest = VolleyDemoApplication.get().getApi().getDemoItemsPage(page, this, this);
+        mInFlightRequest = VolleySingleton.getInstance().getApi().getDemoItemsPage(page, this, this);
     }
 
     @Override

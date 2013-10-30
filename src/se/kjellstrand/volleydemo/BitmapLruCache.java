@@ -1,7 +1,5 @@
 package se.kjellstrand.volleydemo;
 
-import android.app.ActivityManager;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.LruCache;
 
@@ -9,17 +7,16 @@ import com.android.volley.toolbox.ImageLoader.ImageCache;
 
 public class BitmapLruCache extends LruCache<String, Bitmap> implements ImageCache {
 
-    public BitmapLruCache(Context context) {
-        this(((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE))
-                .getMemoryClass() * 1024 / 8);
-    }
-
-    public BitmapLruCache(int sizeInKiloBytes) {
-        super(sizeInKiloBytes);
+    public BitmapLruCache(int sizeInBytes) {
+        // Div by 1024 to make the size a smaller number, giving space for
+        // larger max size of the cache.
+        super(sizeInBytes / 1024);
     }
 
     @Override
     protected int sizeOf(String key, Bitmap bitmap) {
+        // Div by 1024 to make the size a smaller number, giving space for
+        // larger max size of the cache.
         int size = bitmap.getRowBytes() * bitmap.getHeight() / 1024;
         return size;
     }
