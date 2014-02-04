@@ -18,15 +18,9 @@ public class DemoApi {
     }
 
     @SuppressWarnings("unchecked")
-    public Request<DemoItem[]> getDemoItemsPage(int pageNum, Listener<DemoItem[]> listener,
+    public Request<Day[]> getDemoItemsPage(Listener<Day[]> listener,
                              Response.ErrorListener errorListener) {
-        return mQueue.add(new DemoItemsPageRequest(pageNum, listener, errorListener));
-    }
-
-    @SuppressWarnings("unchecked")
-    public Request<DemoItem> getDemoItemDetails(String path, Listener<DemoItem> listener,
-                             Response.ErrorListener errorListener) {
-        return mQueue.add(new DemoItemDetailsRequest(path, listener, errorListener));
+        return mQueue.add(new DaysRequest(listener, errorListener));
     }
 
 }
