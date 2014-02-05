@@ -25,9 +25,8 @@ public class VolleyDemoApplication extends Application {
 
         int memoryClass = ((ActivityManager) getSystemService(Context.ACTIVITY_SERVICE))
                 .getMemoryClass();
-        // move from Mb to Kb, and use about 1/4th of the availiable memmory for
-        // cacheing images.
-        int cacheSize = memoryClass * 1024 / 4;
+        // use about 1/4th of the available memory for caching images.
+        int cacheSize = memoryClass * 1024 * 1024 / 4;
         Log.d(TAG, "Setting cache size to: " + cacheSize + " bytes.");
         VolleySingleton.initialize(getApplicationContext(), cacheSize);
 
